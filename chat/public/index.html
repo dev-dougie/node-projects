@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatzinho</title>
+    <link rel="shortcut icon" href="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.iconsdb.com%2Ficons%2Fdownload%2Fcaribbean-blue%2Fchat-4-512.png&f=1&nofb=1" type="image/x-icon">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"></script>
+    <script src="https://use.fontawesome.com/releases/v5.14.0/js/all.js" data-auto-replace-svg="nest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <form id="chat">
+        <input type="text"  autocomplete = 'off' name = 'username' placeholder="Digite seu usuário">
+        <div class="messages"></div>
+        <input type="text"  autocomplete = 'off' name = 'message' placeholder="Digite sua mensagem">
+        <button type = "submit"><i class="fas fa-paper-plane"></i></button>
+        <button type = "reset"><i class="fas fa-trash-alt"></i></button>
+    </form>
+
+    <script type = 'text/javascript'>
+        var socket = io('http://localhost:5500')
+
+        function renderMessage(message){
+            $('.messages')
+            .append(
+            '<div class = "message" ><strong>'
+                + message.author + 
+            '</strong>: '+message.message +' </div>')
+        }
+
+        socket.on('receivedMessage', function(message){
+            renderMessage(message)
+        })
+
+        socket.on('preveiousMessages', function(messages){
+            for(message of messages){
+                renderMessage(message)
+            }
+        })
+
+        $("#chat").submit(function(event) {
+            event.preventDefault()
+
+            var author = $("input[name=username]").val()
+            var message = $("input[name=message").val()
+
+            if(author.length && message.length){
+                
+                var messageObj = {
+                    author: author,
+                    message: message
+                }
+
+                message = ''
+
+                renderMessage(messageObj)
+
+                socket.emit('sendMessage', messageObj)
+            }
+        })
+    </script>
+</body>
+</html>
